@@ -1,6 +1,6 @@
 import collections
 
-from bio_structs import *
+from bio_structs import DNA_Codons, DNA_Nucleotides
 import random
 class bio_seq:
     """DNA sequence class, Default value: ATCH, DNA, No label"""
@@ -35,21 +35,21 @@ class bio_seq:
         self.__init__(seq, seq_type, "Randomly generated sequence")
 
 
-    def countNucFrequency(self):
+    def nucleotide_frequency(self):
+        """Count nucleotides in a given sequence, return a dictionary"""
         return dict(collections.Counter(self.seq))
 
 
     def transcription(self):
         # DNA -> RNA Transcription
-        rna = self.seq.replace("T", "U")
-        return rna
+        # return a copier of the sequence
+        return self.seq.replace("T", "U")
 
 
     def reverse_complement(self):
         # return ''.join([DNA_ReverseComplement[nuc] for nuc in seq])[::-1]
-        tmp_seq = self.seq
         mapping = str.maketrans('ATCG', 'TAGC')
-        return tmp_seq.translate(mapping)[::1]
+        return self.seq.translate(mapping)[::1]
 
 
     def gc_content(self):
@@ -68,3 +68,16 @@ class bio_seq:
     def translate_seq(self, init_pos=0):
         """Translate a DNA sequence into an aminoacid sequence"""
         return [DNA_Codons[self.seq[pos:pos + 3]] for pos in range(init_pos, len(self.seq) - 2, 3)]
+
+
+    def codon_usage(self, aminoacid):
+        """Provides the frequency of each codon encoding a given aminoacid in a DNA  sequece """
+        tmpList = []
+        for i in range(0, len(self.seq) - 2, 3):
+            if DNA_Codons[self.seq[i:i + 3]] == aminoacid:
+                tmpList.append(self.seq[i:i + 3])
+        freqDict = dict(collections.Counter(tmpList))
+        totalWight = sum(freqDict.values())
+        for seq in freqDict:
+            freqDict[seq] = round(freqDict[seq] / totalWight, 2)
+            return freqDict
